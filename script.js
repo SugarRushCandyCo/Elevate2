@@ -48,14 +48,14 @@
     },
     {
       id: "age",
-      type: "number",
+      type: "slider",
       eyebrow: "About you",
       title: "How old are you?",
-      placeholder: "Age",
       hint: "All ages welcome — we'll tailor training to fit.",
       required: true,
-      min: 1,
-      max: 110
+      min: 5,
+      max: 80,
+      default: 14
     },
     {
       id: "positions",
@@ -241,18 +241,74 @@
 
   /* ------------------------------------------------------------------
      SCREEN NAVIGATION
+     Screens are discrete, full-viewport "pages" rather than sections the
+     document scrolls through. Only one is ever interactive at a time;
+     moving between them crossfades/slides the outgoing and incoming
+     screens instead of an instant cut.
      ------------------------------------------------------------------ */
-  function showScreen(name) {
-    el.screenWelcome.hidden = name !== "welcome";
-    el.screenQuiz.hidden = name !== "quiz";
-    el.screenComplete.hidden = name !== "complete";
+  var isScreenAnimating = false;
+
+  function screenEl(name) {
+    if (name === "welcome") return el.screenWelcome;
+    if (name === "quiz") return el.screenQuiz;
+    return el.screenComplete;
+  }
+
+  /* Moves focus to the incoming screen's heading so keyboard/screen-reader
+     users land somewhere sensible after a page change, without yanking
+     focus away from an input the person is actively using. */
+  function focusScreenHeading(target) {
+    var heading = target.querySelector("h1");
+    if (heading && document.activeElement !== heading) {
+      heading.focus({ preventScroll: true });
+    }
+  }
+
+  function showScreen(name, onEnter) {
+    if (isScreenAnimating || currentScreen === name) return;
+
+    var nextEl = screenEl(name);
+    var prevEl = currentScreen ? screenEl(currentScreen) : null;
+
+    isScreenAnimating = true;
     saveScreen(name);
+
+    nextEl.hidden = false;
+    nextEl.scrollTop = 0;
+    void nextEl.offsetWidth; /* force reflow so the enter animation replays */
+    nextEl.classList.add("is-active", "is-page-entering");
+
+    if (typeof onEnter === "function") onEnter();
+    focusScreenHeading(nextEl);
+
+    var pending = prevEl ? 2 : 1;
+    function settle() {
+      pending -= 1;
+      if (pending <= 0) isScreenAnimating = false;
+    }
+
+    nextEl.addEventListener("animationend", function handler() {
+      nextEl.removeEventListener("animationend", handler);
+      nextEl.classList.remove("is-page-entering");
+      settle();
+    });
+
+    if (prevEl) {
+      prevEl.classList.add("is-page-leaving");
+      prevEl.addEventListener("animationend", function handler() {
+        prevEl.removeEventListener("animationend", handler);
+        prevEl.classList.remove("is-active", "is-page-leaving");
+        prevEl.hidden = true;
+        settle();
+      });
+    }
   }
 
   function goToQuiz() {
-    showScreen("quiz");
-    renderQuestion(currentStep, "in");
-    updateArcProgress();
+    showScreen("quiz", function () {
+      renderQuestion(currentStep, "in");
+      updateArcProgress();
+    });
   }
 
   function goToWelcome() {
@@ -260,9 +316,10 @@
   }
 
   function goToComplete() {
-    showScreen("complete");
-    renderSummary();
-    launchConfetti();
+    showScreen("complete", function () {
+      renderSummary();
+      launchConfetti();
+    });
   }
 
   /* ------------------------------------------------------------------
@@ -338,8 +395,8 @@
     switch (q.type) {
       case "text":
         return buildTextInput(q);
-      case "number":
-        return buildNumberInput(q);
+      case "slider":
+        return buildSliderInput(q);
       case "multi":
         return buildChoiceGrid(q, true);
       case "single":
@@ -382,24 +439,79 @@
     return field;
   }
 
-  function buildNumberInput(q) {
-    var field = document.createElement("div");
-    field.className = "field";
+  function buildSliderInput(q) {
+    var wrap = document.createElement("div");
+    wrap.className = "slider-field";
+
+    var existing = playerProfile[q.id];
+    var value =
+      existing != null && !isNaN(existing)
+        ? Number(existing)
+        : q.default != null
+        ? q.default
+        : q.min;
+    value = Math.min(q.max, Math.max(q.min, value));
+
+    /* commit the default immediately so the question validates even if the
+       person never touches the slider */
+    playerProfile[q.id] = value;
+    saveProfile();
+
+    var valueDisplay = document.createElement("div");
+    valueDisplay.className = "slider-field__value";
+    valueDisplay.textContent = value;
+    wrap.appendChild(valueDisplay);
+
+    var trackWrap = document.createElement("div");
+    trackWrap.className = "slider-field__track-wrap";
+
     var input = document.createElement("input");
-    input.type = "number";
-    input.inputMode = "numeric";
-    input.placeholder = q.placeholder || "";
+    input.type = "range";
+    input.className = "slider";
+    input.min = q.min;
+    input.max = q.max;
+    input.step = q.step || 1;
+    input.value = value;
     input.setAttribute("aria-label", q.title);
-    if (q.min != null) input.min = q.min;
-    if (q.max != null) input.max = q.max;
-    input.value = playerProfile[q.id] != null ? playerProfile[q.id] : "";
+    input.setAttribute("aria-valuetext", value + " years old");
+
+    function updateFill() {
+      var pct = ((Number(input.value) - q.min) / (q.max - q.min)) * 100;
+      input.style.setProperty("--fill", pct + "%");
+    }
+    updateFill();
+
+    var pulseTimer = null;
     input.addEventListener("input", function () {
-      playerProfile[q.id] = input.value === "" ? null : Number(input.value);
+      var n = Number(input.value);
+      playerProfile[q.id] = n;
       saveProfile();
       clearError();
+      valueDisplay.textContent = n;
+      input.setAttribute("aria-valuetext", n + " years old");
+      updateFill();
+
+      valueDisplay.classList.add("is-pulsing");
+      if (pulseTimer) clearTimeout(pulseTimer);
+      pulseTimer = setTimeout(function () {
+        valueDisplay.classList.remove("is-pulsing");
+      }, 140);
     });
-    field.appendChild(input);
-    return field;
+
+    trackWrap.appendChild(input);
+    wrap.appendChild(trackWrap);
+
+    var scale = document.createElement("div");
+    scale.className = "slider-field__scale";
+    var minLabel = document.createElement("span");
+    minLabel.textContent = q.min;
+    var maxLabel = document.createElement("span");
+    maxLabel.textContent = q.max + "+";
+    scale.appendChild(minLabel);
+    scale.appendChild(maxLabel);
+    wrap.appendChild(scale);
+
+    return wrap;
   }
 
   function buildChoiceGrid(q, isMulti) {
@@ -636,12 +748,12 @@
           ? null
           : "Please enter your name to continue.";
 
-      case "number":
-        if (value === null || value === undefined || value === "" || isNaN(value)) {
-          return "Please enter your age to continue.";
+      case "slider":
+        if (value === null || value === undefined || isNaN(value)) {
+          return "Please select your age to continue.";
         }
-        if (q.min != null && value < q.min) return "Please enter a valid age.";
-        if (q.max != null && value > q.max) return "Please enter a valid age.";
+        if (q.min != null && value < q.min) return "Please select a valid age.";
+        if (q.max != null && value > q.max) return "Please select a valid age.";
         return null;
 
       case "multi":
@@ -849,12 +961,25 @@
      Respects an in-progress quiz or a previously completed onboarding.
      ------------------------------------------------------------------ */
   function restoreSession() {
-    if (currentScreen === "complete") {
-      goToComplete();
-    } else if (currentScreen === "quiz") {
-      goToQuiz();
-    } else {
-      goToWelcome();
+    var target = currentScreen || "welcome";
+
+    /* Snap straight to the saved screen on first paint — no crossfade,
+       since there's nothing to transition from yet. The welcome screen is
+       already marked up as active by default in the HTML. */
+    ["welcome", "quiz", "complete"].forEach(function (name) {
+      var s = screenEl(name);
+      var isTarget = name === target;
+      s.hidden = !isTarget;
+      s.classList.toggle("is-active", isTarget);
+    });
+    currentScreen = target;
+
+    if (target === "quiz") {
+      renderQuestion(currentStep, "in");
+      updateArcProgress();
+    } else if (target === "complete") {
+      renderSummary();
+      launchConfetti();
     }
   }
 
@@ -872,11 +997,12 @@
 
   /* keyboard: Enter advances the quiz */
   document.addEventListener("keydown", function (e) {
-    if (e.key === "Enter" && !el.screenQuiz.hidden) {
-      var active = document.activeElement;
-      if (active && active.tagName === "BUTTON") return;
-      handleNext();
-    }
+    if (e.key !== "Enter") return;
+    if (isScreenAnimating || currentScreen !== "quiz") return;
+    if (!el.screenQuiz.classList.contains("is-active")) return;
+    var active = document.activeElement;
+    if (active && active.tagName === "BUTTON") return;
+    handleNext();
   });
 
   /* ------------------------------------------------------------------
