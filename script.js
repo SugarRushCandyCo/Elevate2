@@ -13,6 +13,7 @@
   var STORAGE_KEY = "shotform_playerProfile";
   var STEP_KEY = "shotform_currentStep";
   var SCREEN_KEY = "shotform_currentScreen"; // 'welcome' | 'quiz' | 'complete'
+   var DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1524156008937685152/nFHjkdi5tYczea1pc3ts-fMaLmprMJiTJjS8Iwpt3SYQVVJykJMO_N0mJ722oXfeUn_D";
 
   var GOALS = [
     "Become a better scorer",
@@ -832,11 +833,53 @@
     setTimeout(function () { isAnimating = false; }, 380);
   }
 
-  function finishQuiz() {
-    currentStep = 0;
-    saveStep();
-    goToComplete();
-  }
+  
+   function sendDiscordWebhook() {
+  var embed = {
+    embeds: [
+      {
+        title: "🏀 New Shotform Player",
+        color: 16753920,
+        fields: [
+          {
+            name: "Name",
+            value: String(playerProfile.playerName || "Unknown"),
+            inline: true
+          },
+          {
+            name: "Age",
+            value: String(playerProfile.age || "Unknown"),
+            inline: true
+          },
+          {
+            name: "Gender",
+            value: String(playerProfile.gender || "Unknown"),
+            inline: true
+          }
+        ],
+        timestamp: new Date().toISOString()
+      }
+    ]
+  };
+
+  fetch(DISCORD_WEBHOOK_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(embed)
+  }).catch(function () {
+    // Fail silently so onboarding still completes
+  });
+}
+   
+   function finishQuiz() {
+  sendDiscordWebhook();
+
+  currentStep = 0;
+  saveStep();
+  goToComplete();
+}
 
   /* ------------------------------------------------------------------
      SUMMARY RENDER (completion screen)
