@@ -1,61 +1,35 @@
-/* Core Reset & Variables */
 :root {
     --bg-primary: #000000;
-    --bg-secondary: #111111;
-    --border-color: #222222;
     --text-primary: #ffffff;
-    --text-secondary: #888888;
-    --accent: #ffffff;
-    --accent-dim: #333333;
+    --accent-start: #ff4d4d;
+    --accent-end: #ff1a1a;
     --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    --transition-smooth: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
 }
 
 body {
     background-color: var(--bg-primary);
     color: var(--text-primary);
     font-family: var(--font-sans);
-    -webkit-font-smoothing: antialiased;
     height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    overflow: hidden;
 }
 
-/* App Framework Layout */
 .app-container {
     width: 100%;
     max-width: 480px;
-    height: 100vh;
-    max-height: 850px;
     background-color: var(--bg-primary);
-    border: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
-    position: relative;
+    padding: 20px;
 }
 
-@media (max-width: 480px) {
-    .app-container {
-        max-height: 100vh;
-        border: none;
-    }
-}
-
-/* Header & Logo styling */
 .app-header {
-    padding: 24px 32px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 20px;
 }
 
 .brand {
@@ -63,8 +37,6 @@ body {
     align-items: center;
     gap: 8px;
     font-weight: 800;
-    letter-spacing: 0.1em;
-    font-size: 1.1rem;
 }
 
 .logo {
@@ -74,207 +46,48 @@ body {
 
 .step-counter {
     font-size: 0.85rem;
-    color: var(--text-secondary);
-    font-weight: 500;
 }
 
-/* Progress Indicator */
-.progress-container {
-    width: 100%;
-    height: 2px;
-    background-color: var(--border-color);
-}
-
-.progress-bar {
-    height: 100%;
-    width: 0%;
-    background-color: var(--accent);
-    transition: var(--transition-smooth);
-}
-
-/* Main Content Area */
 .main-content {
     flex: 1;
-    padding: 40px 32px;
-    overflow-y: auto;
-}
-
-.step-card {
-    opacity: 0;
-    transform: translateY(10px);
-    animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-@keyframes fadeInUp {
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Typography & Visual Hierarchy */
-.step-title {
-    font-size: 1.75rem;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    margin-bottom: 8px;
-    line-height: 1.2;
-}
-
-.step-subtitle {
-    font-size: 0.95rem;
-    color: var(--text-secondary);
-    margin-bottom: 32px;
-    line-height: 1.5;
-}
-
-/* Input Styles */
-.input-text-wrapper {
-    position: relative;
-}
-
-.input-text {
-    width: 100%;
-    background: transparent;
-    border: none;
-    border-bottom: 2px solid var(--border-color);
-    color: var(--text-primary);
-    font-size: 1.5rem;
-    padding: 12px 0;
-    font-family: inherit;
-    outline: none;
-    transition: var(--transition-smooth);
-}
-
-.input-text:focus {
-    border-color: var(--accent);
-}
-
-/* Dual measurement inputs (ft/in) */
-.dual-input-row {
-    display: flex;
-    gap: 16px;
-}
-
-.input-group {
-    flex: 1;
     display: flex;
     flex-direction: column;
-}
-
-.input-label {
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: 4px;
-}
-
-/* Choice Selection UI (Grid & Lists) */
-.options-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.option-item {
-    background-color: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    padding: 18px 20px;
-    border-radius: 4px;
-    cursor: pointer;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    transition: var(--transition-smooth);
-}
-
-.option-item:hover {
-    border-color: #444444;
-}
-
-.option-item.selected {
-    background-color: var(--accent);
-    border-color: var(--accent);
-    color: var(--bg-primary);
-}
-
-.option-item .checkbox-indicator {
-    width: 18px;
-    height: 18px;
-    border: 1px solid var(--border-color);
-    border-radius: 2px;
-    display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.option-item.selected .checkbox-indicator {
-    border-color: var(--bg-primary);
-    background: var(--bg-primary);
+.step-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 20px;
 }
 
-/* Custom Multi-select indicator checkmark stub */
-.option-item.selected .checkbox-indicator::after {
-    content: "✓";
-    font-size: 0.75rem;
-    color: var(--accent);
+.random-line {
+    width: 100%;
+    height: 2px;
+    background-color: #ffffff;
 }
 
-/* Footer & Action Controls */
 .app-footer {
-    padding: 24px 32px;
     display: flex;
-    gap: 16px;
-    border-top: 1px solid var(--border-color);
-    background-color: var(--bg-primary);
+    gap: 10px;
+    margin-top: auto;
 }
 
 .btn {
-    font-family: inherit;
-    font-size: 0.95rem;
+    padding: 10px 20px;
+    border-radius: 20px;
     font-weight: 600;
-    padding: 16px 24px;
-    border-radius: 4px;
     cursor: pointer;
-    border: none;
-    transition: var(--transition-smooth);
-}
-
-.btn-primary {
-    background-color: var(--accent);
-    color: var(--bg-primary);
-    flex: 2;
-}
-
-.btn-primary:hover {
-    background-color: #e5e5e5;
 }
 
 .btn-secondary {
-    background-color: transparent;
-    color: var(--text-secondary);
-    border: 1px solid var(--border-color);
-    flex: 1;
+    background-color: #888888;
+    color: #ffffff;
 }
 
-.btn-secondary:hover:not([disabled]) {
-    color: var(--text-primary);
-    border-color: var(--text-secondary);
+.btn-primary {
+    background-image: linear-gradient(to right, var(--accent-start), var(--accent-end));
+    color: #ffffff;
 }
-
-.btn[disabled] {
-    opacity: 0.3;
-    cursor: not-allowed;
-}
-
-/* Final Summary Card view */
-.summary-item {
-    display: flex;
-    justify-content: space-between;
-    padding: 12px 0;
-    border-bottom: 1px solid var(--border-color);
-    font-size: 0.95rem;
-}
-.summary-label { color: var(--text-secondary); }
-.summary-value { font-weight: 600; text-transform: capitalize; }
