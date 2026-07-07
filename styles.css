@@ -57,16 +57,16 @@
 
 html, body {
   height: 100%;
-  overscroll-behavior-y: none;
+  overflow: hidden;
+  overscroll-behavior: none;
 }
 
 body {
   background: var(--bg);
   color: var(--text-primary);
   font-family: var(--font-body);
-  min-height: 100vh;
-  min-height: 100dvh;
-  overflow-x: hidden;
+  height: 100vh;
+  height: 100dvh;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -189,29 +189,71 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 700; letter-spacing:
    APP SHELL / SCREENS
    ========================================================================== */
 .app {
-  position: relative;
+  position: fixed;
+  inset: 0;
   z-index: 1;
-  min-height: 100vh;
-  min-height: 100dvh;
-  display: flex;
-  flex-direction: column;
+  overflow: hidden;
 }
 
+/* Each screen is a discrete, full-viewport page. Only the active one is
+   interactive; screens crossfade/slide between one another rather than the
+   document scrolling from one to the next. If a screen's own content is
+   taller than the viewport, that screen scrolls internally. */
 .screen {
-  min-height: 100vh;
-  min-height: 100dvh;
-  width: 100%;
-  max-width: var(--max-width);
-  margin: 0 auto;
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   display: flex;
   flex-direction: column;
-  padding: max(28px, env(safe-area-inset-top)) 24px max(28px, env(safe-area-inset-bottom));
+  padding: max(28px, env(safe-area-inset-top)) 0 max(28px, env(safe-area-inset-bottom));
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.screen.is-active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.screen.is-page-entering { animation: page-in var(--dur-slow) var(--ease-out) forwards; }
+.screen.is-page-leaving { animation: page-out var(--dur-med) var(--ease-in-out) forwards; pointer-events: none; }
+
+@keyframes page-in {
+  from { opacity: 0; transform: translateY(16px) scale(0.99); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes page-out {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to   { opacity: 0; transform: translateY(-12px) scale(0.99); }
+}
+
+/* Centered, max-width column that holds each screen's actual content.
+   Kept separate from .screen so full-bleed decoration (confetti canvas,
+   completion glow) can still span the entire screen. */
+.screen__inner {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: var(--max-width);
+  min-height: 100%;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.screen__inner--center {
+  justify-content: center;
+  align-items: center;
+  text-align: center;
 }
 
 /* ==========================================================================
    WELCOME SCREEN
    ========================================================================== */
-.screen--welcome {
+.screen--welcome .screen__inner {
   justify-content: center;
   align-items: stretch;
 }
@@ -513,6 +555,104 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 700; letter-spacing:
 }
 
 /* ==========================================================================
+   SLIDER FIELD (e.g. age)
+   ========================================================================== */
+.slider-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 6px 2px 2px;
+}
+
+.slider-field__value {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 58px;
+  line-height: 1;
+  text-align: center;
+  background: var(--grad-ember);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+
+.slider-field__value.is-pulsing { transform: scale(1.1); }
+
+.slider-field__track-wrap { padding: 18px 2px 4px; }
+
+input[type="range"].slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(
+    to right,
+    var(--ember) 0%,
+    var(--ember) var(--fill, 50%),
+    var(--surface-strong) var(--fill, 50%),
+    var(--surface-strong) 100%
+  );
+  outline: none;
+  cursor: pointer;
+  touch-action: pan-y;
+}
+
+input[type="range"].slider:focus-visible {
+  outline: 2px solid var(--ember);
+  outline-offset: 6px;
+}
+
+input[type="range"].slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--grad-ember);
+  border: 3px solid var(--bg);
+  box-shadow: 0 4px 16px -2px rgba(255, 59, 48, 0.65), 0 0 0 1px var(--border-strong);
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+
+input[type="range"].slider::-webkit-slider-thumb:active { transform: scale(1.18); }
+
+input[type="range"].slider::-moz-range-track {
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--surface-strong);
+}
+
+input[type="range"].slider::-moz-range-progress {
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--grad-ember);
+}
+
+input[type="range"].slider::-moz-range-thumb {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--grad-ember);
+  border: 3px solid var(--bg);
+  box-shadow: 0 4px 16px -2px rgba(255, 59, 48, 0.65);
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+
+input[type="range"].slider::-moz-range-thumb:active { transform: scale(1.18); }
+
+.slider-field__scale {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-tertiary);
+  font-family: var(--font-display);
+  padding: 0 1px;
+}
+
+/* ==========================================================================
    OPTION GRID (single / multi select choice buttons)
    ========================================================================== */
 .option-grid {
@@ -652,10 +792,6 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: 700; letter-spacing:
    COMPLETE SCREEN
    ========================================================================== */
 .screen--complete {
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  position: relative;
   overflow: hidden;
 }
 
