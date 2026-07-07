@@ -46,7 +46,8 @@
   <main id="app" class="app" aria-live="polite">
 
     <!-- ============ SCREEN: WELCOME ============ -->
-    <section id="screen-welcome" class="screen screen--welcome" data-screen>
+    <section id="screen-welcome" class="screen screen--welcome is-active" data-screen>
+      <div class="screen__inner">
       <div class="welcome__content">
         <div class="brand">
           <span class="brand__mark" aria-hidden="true">
@@ -67,7 +68,7 @@
           <span class="brand__name">ShotForm</span>
         </div>
 
-        <h1 class="welcome__title">
+        <h1 class="welcome__title" tabindex="-1">
           Welcome to your<br /><span class="text-gradient">basketball journey.</span>
         </h1>
         <p class="welcome__subtitle">
@@ -81,10 +82,12 @@
           </svg>
         </button>
       </div>
+      </div>
     </section>
 
     <!-- ============ SCREEN: QUIZ ============ -->
     <section id="screen-quiz" class="screen screen--quiz" data-screen hidden>
+      <div class="screen__inner">
 
       <header class="quiz__header">
         <button id="btn-back" class="icon-btn" type="button" aria-label="Go back">
@@ -121,6 +124,7 @@
           <span>Next</span>
         </button>
       </footer>
+      </div>
     </section>
 
     <!-- ============ SCREEN: COMPLETE ============ -->
@@ -128,6 +132,7 @@
       <div class="complete__glow" aria-hidden="true"></div>
       <canvas id="confetti-canvas" class="confetti-canvas" aria-hidden="true"></canvas>
 
+      <div class="screen__inner screen__inner--center">
       <div class="complete__content">
         <div class="check-wrap">
           <svg class="check-svg" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -142,10 +147,11 @@
           </svg>
         </div>
 
-        <h1 class="complete__title">Answers Collected!</h1>
+        <h1 class="complete__title" tabindex="-1">Answers Collected!</h1>
         <p class="complete__subtitle">Your basketball profile has been created.</p>
 
         <div id="profile-summary" class="profile-summary"></div>
+      </div>
       </div>
     </section>
 
