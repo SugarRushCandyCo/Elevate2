@@ -4,7 +4,7 @@
    as a home-screen web app.
    ========================================================================== */
 
-var CACHE_NAME = "shotform-cache-v1";
+var CACHE_NAME = "shotform-cache-v2";
 var APP_SHELL = [
   "./",
   "./index.html",
