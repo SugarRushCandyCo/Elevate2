@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ISO / Basketball Training Systems</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- App Container -->
+    <div class="app-container">
+        
+        <!-- Header / Navigation Stub -->
+        <header class="app-header">
+            <div class="brand">
+                <svg class="logo" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M6 12A6 6 0 0 1 18 12"></path>
+                    <path d="M12 6A6 6 0 0 1 12 18"></path>
+                </svg>
+                <span>ISO</span>
+            </div>
+            <div class="step-counter" id="step-counter">Step 1 of 7</div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Progress Bar -->
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+
+            <!-- Dynamic Quiz Step Container -->
+            <div id="quiz-step-card" class="step-card">
+                <!-- Injected via JavaScript -->
+            </div>
+        </main>
+
+        <!-- Navigation Footer -->
+        <footer class="app-footer">
+            <button id="prev-btn" class="btn btn-secondary" disabled>Back</button>
+            <button id="next-btn" class="btn btn-primary">Next</button>
+        </footer>
+    </div>
+
+    <!-- Application Scripts -->
+    <script src="js/quizData.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
