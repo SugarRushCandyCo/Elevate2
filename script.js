@@ -359,21 +359,54 @@
        DOM traversal (e.g. firstChild), since stray text/comment nodes in
        the markup would otherwise be picked up instead of the real element. */
     var prevChild = currentQuestionEl;
-    if (prevChild && direction !== "in") {
-      var outClass = direction === "forward" ? "is-leaving-forward" : "is-leaving-back";
-      prevChild.classList.add(outClass);
-      prevChild.addEventListener("animationend", function handler() {
-        prevChild.removeEventListener("animationend", handler);
-        if (prevChild.parentNode) prevChild.parentNode.removeChild(prevChild);
-      });
-    } else if (prevChild) {
-      prevChild.remove();
-    }
 
-    var enterClass = direction === "backward" ? "is-entering-back" : "is-entering";
-    wrap.classList.add(enterClass);
-    el.quizBody.appendChild(wrap);
-    currentQuestionEl = wrap;
+if (prevChild) {
+  // Remove any stale question elements that may have been left behind
+  Array.from(el.quizBody.children).forEach(function (child) {
+    if (child !== prevChild) {
+      child.remove();
+    }
+  });
+
+  if (direction !== "in") {
+    var outClass =
+      direction === "forward"
+        ? "is-leaving-forward"
+        : "is-leaving-back";
+
+    prevChild.classList.remove(
+      "is-entering",
+      "is-entering-back",
+      "is-leaving-forward",
+      "is-leaving-back"
+    );
+
+    prevChild.classList.add(outClass);
+
+    prevChild.addEventListener(
+      "animationend",
+      function handler() {
+        prevChild.removeEventListener("animationend", handler);
+
+        if (prevChild.parentNode) {
+          prevChild.parentNode.removeChild(prevChild);
+        }
+      },
+      { once: true }
+    );
+  } else {
+    prevChild.remove();
+  }
+}
+
+var enterClass =
+  direction === "backward"
+    ? "is-entering-back"
+    : "is-entering";
+
+wrap.classList.add(enterClass);
+el.quizBody.appendChild(wrap);
+currentQuestionEl = wrap;
 
     updateNextButtonLabel(index);
     updateBackButtonVisibility(index);
