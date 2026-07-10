@@ -892,13 +892,9 @@ currentQuestionEl = wrap;
 function finishQuiz() {
     sendDiscordWebhook();
 
-    saveProfile();
+    saveProfile(); // make sure latest answers are saved
 
-    goToComplete();
-
-    setTimeout(() => {
-        window.location.href = "/dashboard/";
-    }, 2500);
+    window.location.href = "/dashboard/";
 }
   /* ------------------------------------------------------------------
      SUMMARY RENDER (completion screen)
