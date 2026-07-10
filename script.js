@@ -871,7 +871,7 @@ currentQuestionEl = wrap;
   var embed = {
     embeds: [
       {
-        title: "🏀 New Shotform Player",
+        title: "🏀 New Elevate Player",
         color: 16753920,
         timestamp: new Date().toISOString()
       }
