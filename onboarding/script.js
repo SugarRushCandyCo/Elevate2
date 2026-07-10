@@ -889,14 +889,17 @@ currentQuestionEl = wrap;
   });
 }
    
-   function finishQuiz() {
-  sendDiscordWebhook();
+function finishQuiz() {
+    sendDiscordWebhook();
 
-  currentStep = 0;
-  saveStep();
-  goToComplete();
+    saveProfile();
+
+    goToComplete();
+
+    setTimeout(() => {
+        window.location.href = "/dashboard/";
+    }, 2500);
 }
-
   /* ------------------------------------------------------------------
      SUMMARY RENDER (completion screen)
      ------------------------------------------------------------------ */
