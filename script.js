@@ -878,16 +878,6 @@ currentQuestionEl = wrap;
             name: "Name",
             value: String(playerProfile.playerName || "Unknown"),
             inline: true
-          },
-          {
-            name: "Age",
-            value: String(playerProfile.age || "Unknown"),
-            inline: true
-          },
-          {
-            name: "Gender",
-            value: String(playerProfile.gender || "Unknown"),
-            inline: true
           }
         ],
         timestamp: new Date().toISOString()
