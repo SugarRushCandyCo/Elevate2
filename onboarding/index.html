@@ -10,13 +10,13 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Elevate" />
-  <link rel="manifest" href="manifest.json" />
-  <link rel="apple-touch-icon" href="assets/Elevate Logo.png" />
-  <link rel="icon" href="assets/Elevate Logo.png" />
+  <link rel="manifest" href="../manifest.json" />
+  <link rel="apple-touch-icon" href="../assets/Elevate Logo.png" />
+  <link rel="icon" href="../assets/Elevate Logo.png" />
 
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="../styles.css" />
   <script defer src="https://cloud.umami.is/script.js" data-website-id="6bcb85d3-9731-4675-a4c1-59ea0014a3fa"></script>
-  
+
 </head>
 <body>
 
@@ -46,48 +46,8 @@
 
   <main id="app" class="app" aria-live="polite">
 
-    <!-- ============ SCREEN: WELCOME ============ -->
-    <section id="screen-welcome" class="screen screen--welcome is-active" data-screen>
-      <div class="screen__inner">
-      <div class="welcome__content">
-        <div class="brand">
-          <span class="brand__mark" aria-hidden="true">
-            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="24" cy="24" r="19" stroke="url(#brandGrad)" stroke-width="2.5"/>
-              <path d="M5 24H43" stroke="url(#brandGrad)" stroke-width="2"/>
-              <path d="M24 5V43" stroke="url(#brandGrad)" stroke-width="2"/>
-              <path d="M9 10.5C13.5 15.5 13.5 32.5 9 37.5" stroke="url(#brandGrad)" stroke-width="2"/>
-              <path d="M39 10.5C34.5 15.5 34.5 32.5 39 37.5" stroke="url(#brandGrad)" stroke-width="2"/>
-              <defs>
-                <linearGradient id="brandGrad" x1="5" y1="5" x2="43" y2="43" gradientUnits="userSpaceOnUse">
-                  <stop stop-color="#FF6B4A"/>
-                  <stop offset="1" stop-color="#B91C1C"/>
-                </linearGradient>
-              </defs>
-            </svg>
-          </span>
-          <span class="brand__name">Elevate</span>
-        </div>
-
-        <h1 class="welcome__title" tabindex="-1">
-          Welcome to your<br /><span class="text-gradient">basketball journey.</span>
-        </h1>
-        <p class="welcome__subtitle">
-          Let's build your personalized training experience.
-        </p>
-
-        <button id="btn-start" class="btn btn--primary btn--large" type="button">
-          <span>Start</span>
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-            <path d="M3 9H15M15 9L10 4M15 9L10 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
-      </div>
-      </div>
-    </section>
-
-    <!-- ============ SCREEN: QUIZ ============ -->
-    <section id="screen-quiz" class="screen screen--quiz" data-screen hidden>
+    <!-- ============ SCREEN: QUIZ (now the entry screen for /onboarding) ============ -->
+    <section id="screen-quiz" class="screen screen--quiz is-active" data-screen>
       <div class="screen__inner">
 
       <header class="quiz__header">
@@ -158,6 +118,6 @@
 
   </main>
 
-  <script src="script.js"></script>
+  <script src="../script.js"></script>
 </body>
 </html>
