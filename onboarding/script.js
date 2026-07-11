@@ -2,6 +2,9 @@
    SHOTFORM ONBOARDING — APP LOGIC
    Vanilla JS, no dependencies. Manages a multi-step quiz, persists answers
    to localStorage as `playerProfile`, and animates between screens.
+
+   NOTE: The welcome/start screen now lives at the site root (index.html).
+   This file powers /onboarding only, which opens directly on question 1.
    ========================================================================== */
 
 (function () {
@@ -12,7 +15,7 @@
      ------------------------------------------------------------------ */
   var STORAGE_KEY = "shotform_playerProfile";
   var STEP_KEY = "shotform_currentStep";
-  var SCREEN_KEY = "shotform_currentScreen"; // 'welcome' | 'quiz' | 'complete'
+  var SCREEN_KEY = "shotform_currentScreen"; // 'quiz' | 'complete'
    var DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1524156008937685152/nFHjkdi5tYczea1pc3ts-fMaLmprMJiTJjS8Iwpt3SYQVVJykJMO_N0mJ722oXfeUn_D";
 
   var GOALS = [
@@ -130,10 +133,8 @@
      ------------------------------------------------------------------ */
   var el = {
     loader: document.getElementById("loader"),
-    screenWelcome: document.getElementById("screen-welcome"),
     screenQuiz: document.getElementById("screen-quiz"),
     screenComplete: document.getElementById("screen-complete"),
-    btnStart: document.getElementById("btn-start"),
     btnBack: document.getElementById("btn-back"),
     btnNext: document.getElementById("btn-next"),
     quizBody: document.getElementById("quiz-body"),
@@ -183,9 +184,12 @@
 
   function loadScreen() {
     try {
-      return localStorage.getItem(SCREEN_KEY) || "welcome";
+      var saved = localStorage.getItem(SCREEN_KEY);
+      /* "welcome" is a leftover value from before the welcome screen moved
+         to the site root — treat it (and anything unrecognized) as "quiz". */
+      return saved === "complete" ? "complete" : "quiz";
     } catch (e) {
-      return "welcome";
+      return "quiz";
     }
   }
 
@@ -250,7 +254,6 @@
   var isScreenAnimating = false;
 
   function screenEl(name) {
-    if (name === "welcome") return el.screenWelcome;
     if (name === "quiz") return el.screenQuiz;
     return el.screenComplete;
   }
@@ -303,17 +306,6 @@
         settle();
       });
     }
-  }
-
-  function goToQuiz() {
-    showScreen("quiz", function () {
-      renderQuestion(currentStep, "in");
-      updateArcProgress();
-    });
-  }
-
-  function goToWelcome() {
-    showScreen("welcome");
   }
 
   function goToComplete() {
@@ -1017,14 +1009,15 @@ function finishQuiz() {
   /* ------------------------------------------------------------------
      RESTORE SESSION ON LOAD
      Respects an in-progress quiz or a previously completed onboarding.
+     There is no "welcome" screen here anymore — /onboarding always opens
+     on the quiz (or the complete screen, if that's where the person left
+     off), so this snaps straight to the saved screen on first paint with
+     no crossfade, since there's nothing to transition from yet.
      ------------------------------------------------------------------ */
   function restoreSession() {
-    var target = currentScreen || "welcome";
+    var target = currentScreen || "quiz";
 
-    /* Snap straight to the saved screen on first paint — no crossfade,
-       since there's nothing to transition from yet. The welcome screen is
-       already marked up as active by default in the HTML. */
-    ["welcome", "quiz", "complete"].forEach(function (name) {
+    ["quiz", "complete"].forEach(function (name) {
       var s = screenEl(name);
       var isTarget = name === target;
       s.hidden = !isTarget;
@@ -1044,12 +1037,6 @@ function finishQuiz() {
   /* ------------------------------------------------------------------
      EVENT WIRING
      ------------------------------------------------------------------ */
-  el.btnStart.addEventListener("click", function () {
-    currentStep = 0;
-    saveStep();
-    goToQuiz();
-  });
-
   el.btnNext.addEventListener("click", handleNext);
   el.btnBack.addEventListener("click", handleBack);
 
@@ -1065,10 +1052,12 @@ function finishQuiz() {
 
   /* ------------------------------------------------------------------
      SERVICE WORKER REGISTRATION (PWA support)
+     Registered with an absolute path since this page now lives under
+     /onboarding/ rather than the site root.
      ------------------------------------------------------------------ */
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", function () {
-      navigator.serviceWorker.register("service-worker.js").catch(function () {
+      navigator.serviceWorker.register("/service-worker.js").catch(function () {
         /* registration failure shouldn't block the app */
       });
     });
