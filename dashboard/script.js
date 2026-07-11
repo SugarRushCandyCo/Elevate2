@@ -201,10 +201,44 @@
     el.weatherCard.setAttribute("data-state", name);
   }
 
+  /* Free, no-key IP-based geolocation — used as an automatic fallback when
+     the browser Geolocation API is denied, unsupported, or times out.
+     City-level accuracy rather than GPS-precise, but it means the weather
+     card still has something useful to show instead of a dead end. */
+  function ipGeolocate() {
+    return fetch("https://ipapi.co/json/")
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (data) {
+        if (!data || data.latitude == null || data.longitude == null) return null;
+        return {
+          lat: data.latitude,
+          lon: data.longitude,
+          approx: true,
+          grantedAt: Date.now()
+        };
+      })
+      .catch(function () { return null; });
+  }
+
+  /* When precise browser geolocation isn't available, fall back to the
+     rough IP-based location. If that also fails, surface the original
+     error message with a manual retry button. */
+  function fallbackToIpLocation(originalMessage) {
+    ipGeolocate().then(function (loc) {
+      if (loc) {
+        storeLocation(loc);
+        loadWeatherFor(loc, true);
+      } else {
+        el.weatherErrorCopy.textContent = originalMessage;
+        setWeatherView("error");
+      }
+    });
+  }
+
   function requestLocation() {
     if (!("geolocation" in navigator)) {
-      el.weatherErrorCopy.textContent = "Your browser doesn't support location access.";
-      setWeatherView("error");
+      setWeatherView("loading");
+      fallbackToIpLocation("Your browser doesn't support location access.");
       return;
     }
 
@@ -229,8 +263,7 @@
         } else if (err && err.code === 3) {
           message = "Finding your location took too long. Try again.";
         }
-        el.weatherErrorCopy.textContent = message;
-        setWeatherView("error");
+        fallbackToIpLocation(message);
       },
       { enableHighAccuracy: false, timeout: 10000, maximumAge: 5 * 60 * 1000 }
     );
@@ -276,7 +309,8 @@
     var info = classifyWeatherCode(code);
 
     el.weatherPlace.textContent = data.__place || "Your location";
-    el.weatherUpdated.textContent = "Updated " + formatRelativeTime(data.__fetchedAt);
+    el.weatherUpdated.textContent =
+      "Updated " + formatRelativeTime(data.__fetchedAt) + (data.__approx ? " · Approx. location" : "");
     el.weatherIcon.innerHTML = WEATHER_ICONS[info.key] || WEATHER_ICONS.cloudy;
     el.weatherTemp.textContent = Math.round(current.temperature_2m) + "°";
     el.weatherCondition.textContent = info.label;
@@ -323,6 +357,7 @@
         data.lon = loc.lon;
         data.__place = place;
         data.__fetchedAt = Date.now();
+        data.__approx = !!loc.approx;
         storeWeatherCache(data);
         renderWeather(data);
       })
