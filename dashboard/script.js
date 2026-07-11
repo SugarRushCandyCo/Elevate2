@@ -184,10 +184,19 @@
     } catch (e) {}
   }
 
+  /* Toggles which weather-card sub-view is visible ("prompt", "loading",
+     "ready", "error"). We set BOTH the `hidden` attribute AND an inline
+     `display` style — relying on `hidden` alone is fragile because any
+     stylesheet rule that sets `display` on these elements (even
+     unintentionally, e.g. a shared flex/grid class) will silently beat
+     the `hidden` attribute in the cascade, causing every view to render
+     stacked on top of each other at once. */
   function setWeatherView(name) {
     var views = el.weatherCard.querySelectorAll("[data-weather-view]");
     Array.prototype.forEach.call(views, function (v) {
-      v.hidden = v.getAttribute("data-weather-view") !== name;
+      var isActive = v.getAttribute("data-weather-view") === name;
+      v.hidden = !isActive;
+      v.style.display = isActive ? "" : "none";
     });
     el.weatherCard.setAttribute("data-state", name);
   }
